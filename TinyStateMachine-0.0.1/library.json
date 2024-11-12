@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
+  "name": "TinyStateMachine",
+  "version": "0.0.1",
+  "description": "A tiny state machine for state-based architecture on a microcontroller. Supports states and transitions in callback-based architecture.",
+  "keywords": "state machine, tiny state machine, state, transition",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/TheVizWiz/TinyStateMachine"
+  },
+  "authors":
+  [
+    {
+      "name": "TheVizWiz",
+      "url": "https://vibhu.dev"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://www.helloworld.org/",
+  "frameworks": "*",
+  "platforms": "*",
+  "export": {
+    "include": ["**/TinyStateMachine.cpp", "**/TinyStateMachine.h"]
+  }
+}

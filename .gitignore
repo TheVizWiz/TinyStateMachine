@@ -1,0 +1,5 @@
+.pio
+
+# output files
+*.out
+*.so
