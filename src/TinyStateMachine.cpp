@@ -65,7 +65,7 @@ void TinyStateMachine::loop() {
         // transition func will never be null do we don't have to check
         if ((from_states[i] == current_state || from_states[i] == TinyStateMachine::ANY_STATE)
             && transition_funcs[i]()) {
-            to_state = to_states[current_state];
+            to_state = to_states[i];
             break;
         }
     }
