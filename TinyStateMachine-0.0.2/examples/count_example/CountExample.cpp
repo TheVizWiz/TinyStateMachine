@@ -1,25 +1,3 @@
-# TinyStateMachine
-A tiny state machine library for state-based architecture on a microcontroller. 
-Supports states and transitions in callback-based architecture.
-
-## Usage
-- States are defined based on three different callbacks: `enter`, `loop`, and `exit`.
-- Each of these callbacks defines what should happen in those states
-  - `enter` runs once each time the state is entered
-  - `loop` runs once per cycle the state machine is active
-  - `exit` runs when the state is exited
-- States are transitioned between using a `TransitionFunction`, which checks
-if a transition should be successful between the from and to states.
-
-After all the states are set up (usually done in `setup()`), run `state_machine.startup()`.
-Then, in `loop()`, call `state_machine.loop()`. If set up properly, `loop` functions can be non-blocking,
-allowing for multiple state machines to be created at the same time.
-
-## Example
-
-Here's an example program that creates two states. One counts up to 10, the other counts down to 0. The state machine then cycles between them.
-
-```c++
 #include "Arduino.h"
 #include "TinyStateMachine.h"
 
@@ -64,6 +42,3 @@ void loop() {
     tsm.loop();
 
 }
-```
-
-

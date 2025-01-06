@@ -31,7 +31,8 @@ private:
     transition_t max_transitions = 0;
 
 public:
-    static const unsigned char ANY_STATE = 0xFF; // largest number of states.
+    static const state_t NULL_STATE = 0xFF; // largest possible state
+    static const state_t ANY_STATE = NULL_STATE - 1;
 
 
 
@@ -57,6 +58,8 @@ public:
      * @return true if the start state was set successfully, false otherwise (e.g. out of bounds).
      */
     bool set_start_state (state_t start_state);
+
+
     /**
      * Add a state to the state machine. The state is defined using three funcs: start, loop,
      * and stop. Start runs once when the state is entered. Loop runs once per loop of the program.
@@ -64,58 +67,66 @@ public:
      * @param enter_func start func, runs once when the state is entered.
      * @param loop_func loop func, runs once per loop/cycle of the program. NOTE: loop func should be non-blocking if possible.
      * @param exit_func stop func, runs once when the state is exited.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state(EnterFunction enter_func, LoopFunction loop_func, ExitFunction exit_func);
+    state_t add_state(EnterFunction enter_func, LoopFunction loop_func, ExitFunction exit_func);
 
-    /**
+    /*
      * combinations of add state funcs, each missing one or more of the func pointers.
      */
+
+
+
+    /**
+    * Add a state without defining any functions. The enter, loop, and exit functions will be null.
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
+    */
+    state_t add_state();
 
     /**
      * Add a state by only defining the enter function. The loop and exit functions will be null.
      * @param enter_func start func, runs once when the state is entered.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state_enter(EnterFunction enter_func);
+    state_t add_state_enter(EnterFunction enter_func);
 
     /**
      * Add a state by only defining the loop function. The enter and exit functions will be null.
      * @param loop_func loop func, runs once per loop/cycle of the program. NOTE: loop func should be non-blocking if possible.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state_loop(LoopFunction enter_func);
+    state_t add_state_loop(LoopFunction enter_func);
 
     /**
      * Add a state by only defining the exit function. The enter and loop functions will be null.
      * @param exit_func stop func, runs once when the state is exited.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state_exit(ExitFunction enter_func);
+    state_t add_state_exit(ExitFunction enter_func);
 
     /**
      * Add a state by only defining the enter and loop functions. The exit function will be null.
      * @param enter_func start func, runs once when the state is entered.
      * @param loop_func loop func, runs once per loop/cycle of the program. NOTE: loop func should be non-blocking if possible.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state_el (EnterFunction enter_func, LoopFunction loop_func);
+    state_t add_state_el (EnterFunction enter_func, LoopFunction loop_func);
 
     /**
      * Add a state by only defining the loop and exit functions. The enter function will be null.
      * @param loop_func loop func, runs once per loop/cycle of the program. NOTE: loop func should be non-blocking if possible.
      * @param exit_func stop func, runs once when the state is exited.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state_le (LoopFunction loop_func, ExitFunction exit_func);
+    state_t add_state_le (LoopFunction loop_func, ExitFunction exit_func);
 
     /**
      * Add a state by only defining the enter and exit functions. The loop function will be null.
      * @param enter_func start func, runs once when the state is entered.
      * @param exit_func stop func, runs once when the state is exited.
-     * @return true if able to add state successfully, false otherwise (e.g. too many states).
+     * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    bool add_state_ee (EnterFunction enter_func, ExitFunction exit_func);
+    state_t add_state_ee (EnterFunction enter_func, ExitFunction exit_func);
 
 
     /**

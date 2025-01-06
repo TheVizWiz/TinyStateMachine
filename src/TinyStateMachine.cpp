@@ -2,7 +2,9 @@
 
 
 #ifdef ARDUINO
+
 #include "Arduino.h"
+
 #else
 #include "stdlib.h"
 #endif
@@ -80,41 +82,44 @@ void TinyStateMachine::loop() {
     if (enter_funcs[current_state]) enter_funcs[current_state]();
 }
 
-bool TinyStateMachine::add_state(EnterFunction enter_func, LoopFunction loop_func, ExitFunction exit_func) {
-    if (num_states >= max_states) return false;
+state_t TinyStateMachine::add_state(EnterFunction enter_func, LoopFunction loop_func, ExitFunction exit_func) {
+    if (num_states >= max_states) return TinyStateMachine::NULL_STATE;
 
     enter_funcs[num_states] = enter_func;
     loop_funcs[num_states] = loop_func;
     exit_funcs[num_states] = exit_func;
     num_states++;
-    return true;
+    // since we just incremented number of states, return states - 1 for the added state number.
+    return num_states - 1;
 }
 
+state_t TinyStateMachine::add_state() {
+    return this->add_state(nullptr, nullptr, nullptr);
+}
 
-bool TinyStateMachine::add_state_enter(EnterFunction enter_func) {
+state_t TinyStateMachine::add_state_enter(EnterFunction enter_func) {
     return this->add_state(enter_func, nullptr, nullptr);
 }
 
-bool TinyStateMachine::add_state_loop(LoopFunction loop_func) {
+state_t TinyStateMachine::add_state_loop(LoopFunction loop_func) {
     return this->add_state(nullptr, loop_func, nullptr);
 }
 
-bool TinyStateMachine::add_state_exit(ExitFunction exit_func) {
+state_t TinyStateMachine::add_state_exit(ExitFunction exit_func) {
     return this->add_state(nullptr, nullptr, exit_func);
 }
 
-bool TinyStateMachine::add_state_ee(EnterFunction enter_func, ExitFunction exit_func) {
+state_t TinyStateMachine::add_state_ee(EnterFunction enter_func, ExitFunction exit_func) {
     return this->add_state(enter_func, nullptr, exit_func);
 }
 
-bool TinyStateMachine::add_state_el(EnterFunction enter_func, LoopFunction loop_func) {
+state_t TinyStateMachine::add_state_el(EnterFunction enter_func, LoopFunction loop_func) {
     return this->add_state(enter_func, loop_func, nullptr);
 }
 
-bool TinyStateMachine::add_state_le(LoopFunction loop_func, ExitFunction exit_func) {
+state_t TinyStateMachine::add_state_le(LoopFunction loop_func, ExitFunction exit_func) {
     return this->add_state(nullptr, loop_func, exit_func);
 }
-
 
 bool TinyStateMachine::add_transition(state_t from_state, state_t to_state, TransitionFunction transition_func) {
     if (num_transitions >= max_transitions) return false;
