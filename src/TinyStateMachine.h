@@ -23,6 +23,11 @@ private:
     state_t num_states = 0;
     state_t max_states = 0;
 
+    // every state definitions
+    EnterFunction every_state_enter_func;
+    LoopFunction every_state_loop_func;
+    ExitFunction every_state_exit_func;
+
     // transition definitions
     TransitionFunction *transition_funcs;
     transition_t *from_states;
@@ -138,6 +143,32 @@ public:
      * @return true if able to add transition successfully, false otherwise (e.g. too many transitions).
      */
     bool add_transition(state_t from_state, state_t to_state, TransitionFunction transition_func);
+
+
+    /**
+     * Add a function that runs when every single state is entered. Only the last function added will be executed.
+     * @param enter_func the function to run.
+     * @return true if able to add the function, false otherwise.
+     */
+    bool add_every_state_enter(EnterFunction enter_func);
+
+
+    /**
+     * Add a function that runs when every single state is looped. Only the last function added will be executed.
+     * @param loop_func the function to run.
+     * @return true if able to add the function, false otherwise.
+     */
+    bool add_every_state_loop(LoopFunction loop_func);
+
+
+    /**
+     * Add a function that runs when every single state is exited. Only the last function added will be executed.
+     * @param exit_func the function to run.
+     * @return true if able to add the function, false otherwise.
+     */
+    bool add_every_state_exit(ExitFunction exit_func);
+
+
 
     /**
      * Startup func. Should be called once (i.e. in setup()) after all states and transitions are set up.

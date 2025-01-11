@@ -1,13 +1,10 @@
 #include "TinyStateMachine.h"
 
+// forward declarations so malloc and free can be used.
+// not including Arduino.h so that different frameworks can be used.
+void *malloc(size_t size);
 
-#ifdef ARDUINO
-
-#include "Arduino.h"
-
-#else
-#include "stdlib.h"
-#endif
+void free(void *ptr);
 
 TinyStateMachine::TinyStateMachine(state_t max_states, transition_t max_transitions) {
 
@@ -48,12 +45,17 @@ bool TinyStateMachine::set_start_state(state_t start_state) {
 
 void TinyStateMachine::startup() {
     // run the start func on the first state
-    if (enter_funcs[current_state] != nullptr)
+    if (every_state_enter_func)
+        every_state_enter_func();
+
+    if (enter_funcs[current_state])
         enter_funcs[current_state]();
 }
 
 void TinyStateMachine::loop() {
     // run loop on the current state
+    if (every_state_loop_func)
+        every_state_loop_func();
     if (loop_funcs[current_state])
         loop_funcs[current_state]();
 
@@ -77,6 +79,7 @@ void TinyStateMachine::loop() {
 
     // exit the current state, enter the next state, and set current state to next state
     // need to do null checks for func pointers here.
+    if (every_state_exit_func) every_state_exit_func();
     if (exit_funcs[current_state]) exit_funcs[current_state]();
     current_state = to_state;
     if (enter_funcs[current_state]) enter_funcs[current_state]();
@@ -119,6 +122,21 @@ state_t TinyStateMachine::add_state_el(EnterFunction enter_func, LoopFunction lo
 
 state_t TinyStateMachine::add_state_le(LoopFunction loop_func, ExitFunction exit_func) {
     return this->add_state(nullptr, loop_func, exit_func);
+}
+
+bool TinyStateMachine::add_every_state_enter(EnterFunction enter_func) {
+    this->every_state_enter_func = enter_func;
+    return true;
+}
+
+bool TinyStateMachine::add_every_state_loop(LoopFunction loop_func) {
+    this->every_state_loop_func = loop_func;
+    return true;
+}
+
+bool TinyStateMachine::add_every_state_exit(ExitFunction exit_func) {
+    this->every_state_exit_func = exit_func;
+    return true;
 }
 
 bool TinyStateMachine::add_transition(state_t from_state, state_t to_state, TransitionFunction transition_func) {
