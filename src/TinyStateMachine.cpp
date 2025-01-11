@@ -1,10 +1,5 @@
 #include "TinyStateMachine.h"
-
-// forward declarations so malloc and free can be used.
-// not including Arduino.h so that different frameworks can be used.
-void *malloc(size_t size);
-
-void free(void *ptr);
+#include <stdlib.h> // for malloc and free
 
 TinyStateMachine::TinyStateMachine(state_t max_states, transition_t max_transitions) {
 
