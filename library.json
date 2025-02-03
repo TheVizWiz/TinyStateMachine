@@ -1,16 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
   "name": "TinyStateMachine",
-  "version": "0.0.8",
-  "description": "A tiny state machine for state-based architecture on a microcontroller. Supports states and transitions in callback-based architecture.",
+  "version": "0.0.9",
+  "description": "A tiny state machine for state-based architecture on a microcontroller. Supports states and transitions in callback-based architecture. Also supports hierarchical state machines",
   "keywords": "state machine, tiny state machine, state, transition",
-  "repository":
-  {
+  "repository": {
     "type": "git",
     "url": "https://github.com/TheVizWiz/TinyStateMachine"
   },
-  "authors":
-  [
+  "authors": [
     {
       "name": "TheVizWiz",
       "url": "https://vibhu.dev"
@@ -20,11 +18,19 @@
   "frameworks": "*",
   "platforms": "*",
   "export": {
-    "include": ["**/TinyStateMachine.cpp", "**/TinyStateMachine.h", "**/examples"]
+    "include": [
+      "**/TinyStateMachine.cpp",
+      "**/TinyStateMachine.h",
+      "**/examples"
+    ]
   },
-  "examples": [{
-    "name": "Count from 0 to 10 and back to 0",
-    "base": "examples/count_example",
-    "files": ["CountExample.cpp"]
-  }]
+  "examples": [
+    {
+      "name": "Count from 0 to 10 and back to 0",
+      "base": "examples/count_example",
+      "files": [
+        "CountExample.cpp"
+      ]
+    }
+  ]
 }

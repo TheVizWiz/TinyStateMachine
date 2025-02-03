@@ -7,15 +7,16 @@ TinyStateMachine::TinyStateMachine(state_t max_states, transition_t max_transiti
     if (max_states >= TinyStateMachine::ANY_STATE) max_states = TinyStateMachine::ANY_STATE - 1;
 
     this->max_transitions = max_transitions;
-    this->transition_funcs = (TransitionFunction *) malloc(sizeof(TransitionFunction) * this->max_transitions);
-    this->from_states = (state_t *) malloc(sizeof(state_t) * this->max_transitions);
-    this->to_states = (state_t *) malloc(sizeof(state_t) * this->max_transitions);
+    this->transition_funcs = (TransitionFunction *) calloc(this->max_transitions, sizeof(state_t));
+    this->from_states = (state_t *) calloc(this->max_transitions, sizeof(state_t));
+    this->to_states = (state_t *) calloc(this->max_transitions, sizeof(state_t));
 
     this->max_states = max_states;
     this->num_states = 0;
-    this->enter_funcs = (EnterFunction *) malloc(sizeof(EnterFunction) * this->max_states);
-    this->loop_funcs = (LoopFunction *) malloc(sizeof(LoopFunction) * this->max_states);
-    this->exit_funcs = (ExitFunction *) malloc(sizeof(ExitFunction) * this->max_states);
+    this->enter_funcs = (EnterFunction *) calloc(this->max_states, sizeof(EnterFunction));
+    this->loop_funcs = (LoopFunction *) calloc(this->max_states, sizeof(LoopFunction));
+    this->exit_funcs = (ExitFunction *) calloc(this->max_states, sizeof(ExitFunction));
+    this->child_state_machines = (TinyStateMachine **) calloc(this->max_states, sizeof(TinyStateMachine *));
 }
 
 TinyStateMachine::~TinyStateMachine() {
@@ -28,27 +29,37 @@ TinyStateMachine::~TinyStateMachine() {
     free(enter_funcs);
     free(loop_funcs);
     free(exit_funcs);
+    free(child_state_machines);
 }
 
 bool TinyStateMachine::set_start_state(state_t start_state) {
     if (start_state >= num_states) return false;
 
-    this->current_state = start_state;
+    this->start_state = start_state;
     return true;
-
 }
 
 void TinyStateMachine::startup() {
+    // reset current state to the start state.
+    current_state = start_state;
     // run the start func on the first state
     if (every_state_enter_func)
         every_state_enter_func();
-
     if (enter_funcs[current_state])
         enter_funcs[current_state]();
+
+    if (child_state_machines[start_state])
+        child_state_machines[start_state]->startup();
 }
 
 void TinyStateMachine::loop() {
+
+    if (current_state >= num_states)
+        return;
+
     // run loop on the current state
+    if (child_state_machines[current_state])
+        child_state_machines[current_state]->loop();
     if (every_state_loop_func)
         every_state_loop_func();
     if (loop_funcs[current_state])
@@ -141,6 +152,16 @@ bool TinyStateMachine::add_transition(state_t from_state, state_t to_state, Tran
     to_states[num_transitions] = to_state;
     transition_funcs[num_transitions] = transition_func;
     num_transitions++;
+    return true;
+}
+
+bool TinyStateMachine::add_child_state_machine(state_t state, TinyStateMachine *child_state_machine) {
+    if (state >= max_states) {
+        return false;
+    }
+
+    child_state_machines[state] = child_state_machine;
+
     return true;
 }
 

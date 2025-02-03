@@ -19,9 +19,12 @@ private:
     EnterFunction *enter_funcs;
     LoopFunction *loop_funcs;
     ExitFunction *exit_funcs;
+    TinyStateMachine **child_state_machines; // each states can have a child state machine that runs inside that state.
+
     state_t current_state = 0;
     state_t num_states = 0;
     state_t max_states = 0;
+    state_t start_state = 0;
 
     // every state definitions
     EnterFunction every_state_enter_func;
@@ -79,6 +82,7 @@ public:
     /*
      * combinations of add state funcs, each missing one or more of the func pointers.
      */
+
 
 
 
@@ -168,6 +172,10 @@ public:
      */
     bool add_every_state_exit(ExitFunction exit_func);
 
+    /**
+     * Add an child state machine to a specific state. This state machine will be reset
+     */
+     bool add_child_state_machine (state_t state, TinyStateMachine * child_state_machine);
 
 
     /**
