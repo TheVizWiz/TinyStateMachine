@@ -1,30 +1,40 @@
+#pragma once
+
 #ifndef TINYSTATEMACHINE_TINYSTATEMACHINE_H
 #define TINYSTATEMACHINE_TINYSTATEMACHINE_H
+
+#include "functional"
 
 typedef unsigned char state_t;
 typedef unsigned char transition_t;
 
-typedef bool (*TransitionFunction)();
+class TinyStateMachine;
 
-typedef void (*EnterFunction)();
+typedef std::function<bool()> TransitionFunction;
+typedef std::function<void()> EnterFunction;
+typedef std::function<void()> LoopFunction;
+typedef std::function<void()> ExitFunction;
 
-typedef void (*LoopFunction)();
-
-typedef void (*ExitFunction)();
+typedef struct {
+    TinyStateMachine *state_machine;
+    state_t parent_state;
+} ChildStateMachine;
 
 class TinyStateMachine {
 
 private:
     // state definitions
-    EnterFunction *enter_funcs;
-    LoopFunction *loop_funcs;
-    ExitFunction *exit_funcs;
-    TinyStateMachine **child_state_machines; // each states can have a child state machine that runs inside that state.
+    std::vector<EnterFunction> enter_funcs;
+    std::vector<EnterFunction> loop_funcs;
+    std::vector<EnterFunction> exit_funcs;
+    std::vector<ChildStateMachine> child_state_machines; // each states can have a child state machine that runs inside that state.
 
     state_t current_state = 0;
-    state_t num_states = 0;
-    state_t max_states = 0;
+    size_t num_states = 0;
+    size_t max_states = 0;
     state_t start_state = 0;
+    state_t max_child_state_machines = 0;
+    state_t num_child_state_machines = 0;
 
     // every state definitions
     EnterFunction every_state_enter_func;
@@ -32,27 +42,27 @@ private:
     ExitFunction every_state_exit_func;
 
     // transition definitions
-    TransitionFunction *transition_funcs;
-    transition_t *from_states;
-    transition_t *to_states;
+    std::vector<TransitionFunction> transition_funcs;
+    std::vector<state_t> from_states;
+    std::vector<state_t> to_states;
     transition_t num_transitions = 0;
-    transition_t max_transitions = 0;
+    size_t max_transitions = 0;
+
+    void startup_child_state_machines();
+
+    void loop_child_state_machines();
 
 public:
     static const state_t NULL_STATE = 0xFF; // largest possible state
     static const state_t ANY_STATE = NULL_STATE - 1;
 
 
-
     /**
      * Constructor. Allocates buffers to store all of the information required for the state machine.
      * User must define the maximum size of the state machine in terms of both states and transitions in the graph.
      * NOTE: if max_states must be at most ANY_STATE - 1, or will be set to this number otherwise.
-     *
-     * @param max_states max states that will be added to the state machine. ANY does not count as a state for the purposes of this number.
-     * @param max_transitions max transitions that will be added to the state machine.
      */
-    TinyStateMachine(state_t max_states, transition_t max_transitions);
+    TinyStateMachine();
 
     /**
      * Destructor. Deallocates all memory allocated during the creation of the state machine.
@@ -65,7 +75,7 @@ public:
      * can lead to undefined behavior.
      * @return true if the start state was set successfully, false otherwise (e.g. out of bounds).
      */
-    bool set_start_state (state_t start_state);
+    bool set_start_state(state_t start_state);
 
 
     /**
@@ -119,7 +129,7 @@ public:
      * @param loop_func loop func, runs once per loop/cycle of the program. NOTE: loop func should be non-blocking if possible.
      * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    state_t add_state_el (EnterFunction enter_func, LoopFunction loop_func);
+    state_t add_state_el(EnterFunction enter_func, LoopFunction loop_func);
 
     /**
      * Add a state by only defining the loop and exit functions. The enter function will be null.
@@ -127,7 +137,7 @@ public:
      * @param exit_func stop func, runs once when the state is exited.
      * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    state_t add_state_le (LoopFunction loop_func, ExitFunction exit_func);
+    state_t add_state_le(LoopFunction loop_func, ExitFunction exit_func);
 
     /**
      * Add a state by only defining the enter and exit functions. The loop function will be null.
@@ -135,7 +145,7 @@ public:
      * @param exit_func stop func, runs once when the state is exited.
      * @return \state_t the added state if it can be added. \TinyStateMachine::NULL_STATE otherwise
      */
-    state_t add_state_ee (EnterFunction enter_func, ExitFunction exit_func);
+    state_t add_state_ee(EnterFunction enter_func, ExitFunction exit_func);
 
 
     /**
@@ -175,7 +185,7 @@ public:
     /**
      * Add an child state machine to a specific state. This state machine will be reset
      */
-     bool add_child_state_machine (state_t state, TinyStateMachine * child_state_machine);
+    bool add_child_state_machine(state_t state, TinyStateMachine *child_state_machine);
 
 
     /**

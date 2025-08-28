@@ -6,7 +6,7 @@ int counter = 0;
 
 int main(int numArgs, char *args[]) {
 
-    TinyStateMachine tsm = TinyStateMachine(5, 10);
+    TinyStateMachine tsm = TinyStateMachine();
 
 //    tsm.add_state_el([] {
 //        std::cout << "STARTING STATE 1" << std::endl;

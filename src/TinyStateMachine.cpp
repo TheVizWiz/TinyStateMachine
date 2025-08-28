@@ -1,36 +1,25 @@
 #include "TinyStateMachine.h"
 #include <stdlib.h> // for malloc and free
 
-TinyStateMachine::TinyStateMachine(state_t max_states, transition_t max_transitions) {
+TinyStateMachine::TinyStateMachine() {
 
     // if max states is too high, set it to the correct largest number.
     if (max_states >= TinyStateMachine::ANY_STATE) max_states = TinyStateMachine::ANY_STATE - 1;
 
-    this->max_transitions = max_transitions;
-    this->transition_funcs = (TransitionFunction *) calloc(this->max_transitions, sizeof(state_t));
-    this->from_states = (state_t *) calloc(this->max_transitions, sizeof(state_t));
-    this->to_states = (state_t *) calloc(this->max_transitions, sizeof(state_t));
+    this->transition_funcs = std::vector<TransitionFunction>(max_transitions);
+    this->from_states = std::vector<state_t>(max_transitions);
+    this->to_states = std::vector<state_t>(max_transitions);
 
-    this->max_states = max_states;
     this->num_states = 0;
-    this->enter_funcs = (EnterFunction *) calloc(this->max_states, sizeof(EnterFunction));
-    this->loop_funcs = (LoopFunction *) calloc(this->max_states, sizeof(LoopFunction));
-    this->exit_funcs = (ExitFunction *) calloc(this->max_states, sizeof(ExitFunction));
-    this->child_state_machines = (TinyStateMachine **) calloc(this->max_states, sizeof(TinyStateMachine *));
+    this->enter_funcs = std::vector<EnterFunction>();
+    this->loop_funcs = std::vector<LoopFunction>();
+    this->exit_funcs = std::vector<ExitFunction>();
+
+    this->num_child_state_machines = 0;
+    this->child_state_machines = std::vector<ChildStateMachine>();
 }
 
-TinyStateMachine::~TinyStateMachine() {
-    // free transition allocations
-    free(from_states);
-    free(to_states);
-    free(transition_funcs);
-
-    // free state allocations
-    free(enter_funcs);
-    free(loop_funcs);
-    free(exit_funcs);
-    free(child_state_machines);
-}
+TinyStateMachine::~TinyStateMachine() {}
 
 bool TinyStateMachine::set_start_state(state_t start_state) {
     if (start_state >= num_states) return false;
@@ -48,8 +37,14 @@ void TinyStateMachine::startup() {
     if (enter_funcs[current_state])
         enter_funcs[current_state]();
 
-    if (child_state_machines[start_state])
-        child_state_machines[start_state]->startup();
+    for (auto i = 0; i < max_child_state_machines; i++) {
+        if (child_state_machines[i].parent_state == current_state) {
+
+        }
+    }
+
+    startup_child_state_machines();
+
 }
 
 void TinyStateMachine::loop() {
@@ -58,8 +53,7 @@ void TinyStateMachine::loop() {
         return;
 
     // run loop on the current state
-    if (child_state_machines[current_state])
-        child_state_machines[current_state]->loop();
+    loop_child_state_machines();
     if (every_state_loop_func)
         every_state_loop_func();
     if (loop_funcs[current_state])
@@ -160,8 +154,31 @@ bool TinyStateMachine::add_child_state_machine(state_t state, TinyStateMachine *
         return false;
     }
 
-    child_state_machines[state] = child_state_machine;
+    if (num_child_state_machines >= max_child_state_machines) {
+        return false;
+    }
 
+    child_state_machines[state] = {
+            .state_machine = child_state_machine,
+            .parent_state = state
+    };
+
+    num_child_state_machines++;
     return true;
 }
 
+void TinyStateMachine::startup_child_state_machines() {
+    for (int i = 0; i < num_child_state_machines; i++) {
+        if (child_state_machines[i].parent_state == current_state) {
+            child_state_machines[i].state_machine->startup();
+        }
+    }
+}
+
+void TinyStateMachine::loop_child_state_machines() {
+    for (int i = 0; i < num_child_state_machines; i++) {
+        if (child_state_machines[i].parent_state == current_state) {
+            child_state_machines[i].state_machine->loop();
+        }
+    }
+}
